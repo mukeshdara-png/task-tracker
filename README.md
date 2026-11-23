@@ -60,12 +60,12 @@ Add these repository Actions settings under **Settings → Secrets and variables
 
 | Name | Type | Value |
 | --- | --- | --- |
-| `AWS_ROLE_ARN` | Secret | ARN of the existing IAM role authorized for GitHub OIDC. Do not copy an ARN from an example; use the actual role ARN. |
+| `AWS_ROLE_ARN` | Variable | `arn:aws:iam::100808729174:role/GitHubTaskTrackerDev` |
 | `AWS_REGION` | Variable | `us-east-1` |
 | `AWS_ACCOUNT_ID` | Variable | `100808729174` |
 | `ECR_REPOSITORY` | Variable | `task-tracker` |
 
-No AWS access keys or secret keys are used. Third-party actions are pinned to reviewed release commit SHAs; review and update those pins periodically.
+`AWS_ROLE_ARN` is a non-secret GitHub Actions variable and must be read with `vars.AWS_ROLE_ARN`; using `secrets.AWS_ROLE_ARN` when only a variable exists leaves the role ARN empty and prevents OIDC role assumption. No AWS access keys or secret keys are used. Third-party actions are pinned to reviewed release commit SHAs; review and update those pins periodically.
 
 ## AWS OIDC setup
 
