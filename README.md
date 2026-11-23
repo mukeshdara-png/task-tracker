@@ -172,3 +172,6 @@ The exact Buildx log wording can vary by action version.
 - **Port/health check mismatch**: keep the app `SERVER_PORT`, ECS container port, and ALB target-group port aligned. The supplied target group is port 8080; the default image/app port is now 8080.
 
 No code has been pushed and no AWS resources have been created or changed. The next phase can use the SHA-tagged ECR image to configure the existing ECS cluster and ALB.
+
+Browser URL
+http://task-tracker-dev-alb-1601775566.us-east-1.elb.amazonaws.com/
