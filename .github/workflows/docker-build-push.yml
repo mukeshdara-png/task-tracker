@@ -65,6 +65,69 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Diagnose GitHub OIDC claims without printing the token
+        shell: bash
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+        run: |
+          set +x
+          node <<'NODE'
+          async function main() {
+            const requestUrl = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+            const requestToken = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+            if (!requestUrl || !requestToken) {
+              throw new Error("GitHub did not provide OIDC request variables.");
+            }
+
+            const endpoint = new URL(requestUrl);
+            endpoint.searchParams.set("audience", "sts.amazonaws.com");
+            const response = await fetch(endpoint, {
+              headers: { Authorization: `Bearer ${requestToken}` }
+            });
+            if (!response.ok) {
+              throw new Error("GitHub OIDC token request failed.");
+            }
+
+            const { value: jwt } = await response.json();
+            const parts = jwt.split(".");
+            if (parts.length !== 3) {
+              throw new Error("GitHub returned an invalid OIDC token.");
+            }
+
+            const claims = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+            const printedClaims = Object.fromEntries(
+              ["iss", "aud", "sub", "repository", "ref", "event_name"]
+                .map((name) => [name, claims[name] ?? null])
+            );
+            console.log("OIDC claims only (JWT omitted):");
+            console.log(JSON.stringify(printedClaims, null, 2));
+
+            const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+            const checks = {
+              issuer: claims.iss === "https://token.actions.githubusercontent.com",
+              audience: audiences.includes("sts.amazonaws.com"),
+              subject: claims.sub === "repo:mukeshdara-png/task-tracker:ref:refs/heads/main",
+              repository: claims.repository === "mukeshdara-png/task-tracker",
+              ref: claims.ref === "refs/heads/main",
+              event: claims.event_name === "push",
+              awsAccountId: process.env.AWS_ACCOUNT_ID === "100808729174",
+              awsRegion: process.env.AWS_REGION === "us-east-1",
+              ecrRepository: process.env.ECR_REPOSITORY === "task-tracker",
+              roleArn: process.env.AWS_ROLE_ARN === "arn:aws:iam::100808729174:role/GitHubTaskTrackerDev"
+            };
+            console.log("Expected configuration checks:");
+            console.log(JSON.stringify(checks, null, 2));
+
+            if (Object.values(checks).some((matched) => !matched)) {
+              process.exitCode = 1;
+            }
+          }
+
+          main().catch(() => {
+            console.error("OIDC diagnostic failed; token and response contents were suppressed.");
+            process.exitCode = 1;
+          });
+          NODE
       - name: Configure AWS credentials with GitHub OIDC
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:

@@ -165,7 +165,7 @@ The exact Buildx log wording can vary by action version.
 
 ## Troubleshooting
 
-- **`Not authorized to perform sts:AssumeRoleWithWebIdentity`**: check the repository and `main` branch `sub` condition, OIDC audience, provider ARN, and `AWS_ROLE_ARN` secret.
+- **`Not authorized to perform sts:AssumeRoleWithWebIdentity`**: the temporary OIDC diagnostic in the publish job prints only `iss`, `aud`, `sub`, `repository`, `ref`, and `event_name`, plus boolean checks for the expected account, region, ECR repository, and role ARN. It never prints the JWT. Compare the claims with the complete IAM trust policy. If the claims match the expected repository and main-branch subject but STS still denies the request, inspect the live role trust policy for additional conditions and verify its federated provider ARN and client ID/audience. Remove the temporary diagnostic after the issue is resolved.
 - **ECR `AccessDenied`**: verify `ecr:GetAuthorizationToken` and the repository-scoped upload actions above are attached to the assumed role.
 - **ECR repository not found**: verify `task-tracker` exists in account `100808729174` and region `us-east-1`.
 - **Docker build fails to find the JAR**: verify the Maven artifact version still matches the Dockerfile copy path.
