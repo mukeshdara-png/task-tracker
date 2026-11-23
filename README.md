@@ -97,7 +97,7 @@ In **IAM → Roles → [existing GitHub Actions role] → Trust relationships**,
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:mukeshdara-png/task-tracker:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub": "repo:mukeshdara-png@242338459/task-tracker@1468700367:ref:refs/heads/main"
         }
       }
     }

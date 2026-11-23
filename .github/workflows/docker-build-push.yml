@@ -106,7 +106,7 @@ jobs:
             const checks = {
               issuer: claims.iss === "https://token.actions.githubusercontent.com",
               audience: audiences.includes("sts.amazonaws.com"),
-              subject: claims.sub === "repo:mukeshdara-png/task-tracker:ref:refs/heads/main",
+              subject: claims.sub === "repo:mukeshdara-png@242338459/task-tracker@1468700367:ref:refs/heads/main",
               repository: claims.repository === "mukeshdara-png/task-tracker",
               ref: claims.ref === "refs/heads/main",
               event: claims.event_name === "push",
