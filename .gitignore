@@ -1,0 +1,10 @@
+target/
+.idea/
+.vscode/
+*.iml
+.aws/
+.env
+.env.*
+secrets/
+*.pem
+*.key
